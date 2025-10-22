@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Thả Bong Bóng Mơ Ước 🎈</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+  html,body { height:100%; }
+
+  body {
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    background: url('sang.png') center/cover no-repeat;
+    transition: background 3s ease-in-out;
+    color: #fff;
+  }
+
+  /* Intro */
+  .intro {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.28);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding: 24px;
+    z-index: 999;
+    animation: fadeIn 0.6s ease both;
+  }
+
+  .intro-text {
+    font-size: 1.15rem;
+    max-width: 92%;
+    line-height: 1.6;
+    color: #fff;
+    margin-bottom: 18px;
+    opacity: 0;
+    animation: textAppear 0.8s ease forwards;
+  }
+
+  .intro button {
+    padding: 10px 26px;
+    border:none;
+    border-radius: 26px;
+    background: rgba(255,255,255,0.9);
+    color: #222;
+    font-weight:600;
+    cursor:pointer;
+    transform-origin:center;
+    opacity: 0;
+    animation: textAppear 0.8s ease forwards 2.6s;
+  }
+
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes fadeOut { from { opacity: 1 } to { opacity: 0 } }
+  @keyframes textAppear {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* centered hint message (sẽ hiển thị ở giữa màn hình) */
+  .message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.05rem;
+    background: rgba(0,0,0,0.28);
+    padding: 12px 18px;
+    border-radius: 18px;
+    letter-spacing: 0.6px;
+    text-align: center;
+    display: none; /* ẩn ban đầu, show sau intro */
+    z-index: 50;
+  }
+
+  /* popup cuối */
+  .popup {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(255,255,255,0.95);
+    padding: 22px 26px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    font-size: 1.15rem;
+    color: #222;
+    transition: transform 0.45s cubic-bezier(.2,.9,.3,1);
+    z-index: 100;
+    max-width: 86%;
+  }
+
+  .popup.show { transform: translate(-50%, -50%) scale(1); }
+
+  /* inside popup: money images positioned inline (not absolute) */
+  .popup .money-wrap {
+    margin-top: 12px;
+    display:flex;
+    justify-content:center;
+    gap: 14px;
+    align-items:flex-end;
+  }
+
+  .popup .money {
+    width: 110px;
+    max-width: 28%;
+    height: auto;
+    transform-origin: center;
+    /* nhẹ tilt để đẹp */
+  }
+  .popup .money.left { transform: rotate(-8deg); }
+  .popup .money.right { transform: rotate(6deg); }
+
+  /* bong bóng */
+  .bubble {
+    position: absolute;
+    bottom: 0;
+    width: 80px;
+    height: 110px;
+    background: url('balloon.png') center/contain no-repeat;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color: #003366;
+    font-size: 0.78rem;
+    font-weight: 500;
+    opacity: 1;
+    animation: floatUp 7s ease-in forwards;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+    padding-top: 10px;
+    line-height: 1.1;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0) scale(1); opacity: 1; }
+    75%  { opacity: 0.95; }
+    100% { transform: translateY(-120vh) scale(1.05); opacity: 0; }
+  }
+
+  /* responsive */
+  @media (max-width:520px) {
+    .popup { font-size: 1rem; padding: 16px; }
+    .popup .money { width: 90px; }
+    .intro-text { font-size: 1rem; }
+    .message { font-size: 0.98rem; padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+  <!-- Intro -->
+  <div class="intro" id="intro" aria-hidden="false">
+    <div class="intro-text" id="introText"></div>
+    <button id="startBtn">Bắt đầu 🎈</button>
+  </div>
+
+  <!-- Hint (centered) -->
+  <div class="message" id="hint">🌻 Hãy chạm vào màn hình để thả bong bóng mơ ước của bạn 🎈</div>
+
+  <!-- Popup cuối (ảnh tiền nằm bên trong) -->
+  <div class="popup" id="popup" aria-hidden="true">
+    🌙 Ước mơ của bạn đã gửi đến vũ trụ 💫
+    <div class="money-wrap">
+      <img src="money1.png" alt="money" class="money left">
+      <img src="money2.png" alt="money" class="money right">
+    </div>
+  </div>
+
+  <audio id="bgMusic" src="song.mp3" loop></audio>
+
+<script>
+  /* intro text lines */
+  const storyLines = [
+    "Có những điều nhỏ bé… 🌸",
+    "Chúng ta không thể nói ra, nhưng lại muốn gửi gắm vào trời cao 🌤️",
+    "Mỗi bong bóng bạn thả ra là một ước mơ được bay xa hơn 🌈",
+    "Sẵn sàng gửi điều bạn mong nhất chứ?"
+  ];
+
+  const introTextEl = document.getElementById('introText');
+  const intro = document.getElementById('intro');
+  const startBtn = document.getElementById('startBtn');
+  const hint = document.getElementById('hint');
+  const popup = document.getElementById('popup');
+  const music = document.getElementById('bgMusic');
+
+  let lineIndex = 0;
+  function showNextLine() {
+    if (lineIndex >= storyLines.length) return;
+    introTextEl.textContent = storyLines[lineIndex];
+    // trigger animation restart
+    introTextEl.style.animation = 'none';
+    void introTextEl.offsetWidth;
+    introTextEl.style.animation = 'textAppear 0.6s ease forwards';
+    lineIndex++;
+    setTimeout(showNextLine, 2000);
+  }
+  showNextLine();
+
+  // start button: fade intro then show hint and start music
+  startBtn.addEventListener('click', () => {
+    intro.style.animation = 'fadeOut 0.6s ease forwards';
+    // small delay to allow fade
+    setTimeout(() => {
+      // remove intro from DOM so clicks pass through
+      if (intro && intro.parentElement) intro.parentElement.removeChild(intro);
+      hint.style.display = 'block';
+      // play music (user gesture)
+      music.play().catch(()=>{});
+    }, 650);
+  });
+
+  /* wishes in order */
+  const wishes = [
+    "Mong một ngày thật yên ả 🌿",
+    "Trái tim sẽ luôn nhẹ như mây ☁️",
+    "Bình yên là món quà quý nhất 💛",
+    "Một tách trà, một nụ cười ☕",
+    "Mọi điều rồi sẽ ổn thôi 🌸",
+    "Thế giới vẫn đẹp, dù chậm một nhịp 💫",
+    "Mỗi sớm mai là cơ hội mới 🌞",
+    "Hít một hơi thật sâu, rồi mỉm cười 🌼",
+    "Buông bỏ để nhẹ lòng 🍃",
+    "Bình yên nằm trong chính ta 🌻"
+  ];
+
+  let count = 0;
+  let isNight = false;
+
+  // day/night background switch runs from start (intro visible too)
+  setInterval(() => {
+    isNight = !isNight;
+    document.body.style.background = isNight
+      ? "url('dem.png') center/cover no-repeat"
+      : "url('sang.png') center/cover no-repeat";
+  }, 10000);
+
+  // create bubble with ordered wishes
+  function createBubble(x, y) {
+    if (count >= wishes.length) return; // limit
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.style.left = (x - 40) + 'px';
+    bubble.style.bottom = '0px';
+    bubble.textContent = wishes[count];
+    document.body.appendChild(bubble);
+
+    bubble.addEventListener('animationend', () => bubble.remove());
+
+    count++;
+    if (count === wishes.length) {
+      setTimeout(() => popup.classList.add('show'), 700);
+    }
+  }
+
+  // prevent clicks when intro still present; otherwise allow
+  document.body.addEventListener('click', (e) => {
+    // if intro still exists in DOM, ignore clicks
+    if (document.getElementById('intro')) return;
+    // if popup already shown and user clicks popup, ignore
+    if (popup.classList.contains('show')) return;
+    const x = e.clientX;
+    const y = e.clientY;
+    createBubble(x, y);
+  });
+</script>
+</body>
+</html>
